@@ -50,7 +50,9 @@ USER www-data
 RUN php artisan config:clear
 
 # Expose port 80 for Apache
-EXPOSE 80
+#EXPOSE 80
 
 # Start Apache in the foreground with the Laravel application
-CMD ["apache2-foreground"]
+#CMD ["apache2-foreground"]
+
+CMD php artisan serve --host=0.0.0.0 --port 80
