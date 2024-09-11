@@ -17,7 +17,7 @@ class StaffManagementController extends Controller
         $userList = DB::table('staff_management')
         ->select('staff_management.staff_id','staff_management.name','staff_management.nric_no','staff_management.contact_no','users.email','users.status as status','roles.role_name as role','users.id as user_id')
         ->leftJoin('users','users.staff_id','=','staff_management.staff_id')
-        ->leftJoin('Roles','roles.id','=','users.role_id')
+        ->leftJoin('roles','roles.id','=','users.role_id')
         ->orderBy('staff_management.name','asc')
         ->get();
 
@@ -73,7 +73,7 @@ class StaffManagementController extends Controller
         $userList = DB::table('staff_management')
         ->select('staff_management.staff_id','staff_management.name','staff_management.nric_no','staff_management.contact_no','users.email','users.status as status','roles.id as role_id','roles.role_name as role')
         ->leftJoin('users','users.staff_id','=','staff_management.staff_id')
-        ->leftJoin('Roles','roles.id','=','users.role_id')
+        ->leftJoin('roles','roles.id','=','users.role_id')
         ->where('staff_management.staff_id',$request->staff_id)
         ->first();
         
