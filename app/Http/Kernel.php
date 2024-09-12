@@ -43,21 +43,33 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class, // Substitute route bindings
             \App\Http\Middleware\GzipMiddleware::class,
         ],
-
+        
         'api' => [
             'throttle:100,1', // Allows 100 requests per minute for API
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            'auth:api', // Require API token authentication for all API routes
+            // 'auth:api', // Require API token authentication for all API routes
             \App\Http\Middleware\GzipMiddleware::class,
-            'jwt.auth', // JWT authentication middleware
+            // 'jwt.auth', // JWT authentication middleware
             \Spatie\ResponseCache\Middlewares\CacheResponse::class, // Cache API responses
+            // \App\Http\Middleware\EnforceApiHeaders::class, // Enforce API only
         ],
         'apiPublic' => [
             'throttle:60,1', // Allows 100 requests per minute for API
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \Spatie\ResponseCache\Middlewares\CacheResponse::class, // Cache API responses
             \App\Http\Middleware\GzipMiddleware::class,
+            // \App\Http\Middleware\EnforceApiHeaders::class, // Enforce API only
         ],
+        'apiInternal' => [
+            'throttle:100,1', // Allows 100 requests per minute for API
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            'auth:api', // Require API token authentication for all API routes
+            \App\Http\Middleware\GzipMiddleware::class,
+            'jwt.auth', // JWT authentication middleware
+            \Spatie\ResponseCache\Middlewares\CacheResponse::class, // Cache API responses
+            \App\Http\Middleware\EnforceApiHeaders::class, // Enforce API only
+        ],
+
     ];
 
     /**
