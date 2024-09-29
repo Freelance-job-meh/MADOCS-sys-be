@@ -18,7 +18,6 @@ class RolesController extends Controller
         return response()->json(["message" => "List of Roles :", 'list' => $rolelist, "code" => 200]);
     }
 
-
     /////////////////////////////////////////////////////////////////////////////
     public function index()
     {

@@ -35,6 +35,7 @@ Route::group(['middleware' => ['jwt.verify']], function () {
 
 // -------------------- Role Management Routes --------------------
 Route::group(['prefix' => 'roles','middleware' => 'apiInternal'], function () {
+    Route::get('/getRolesList', [RolesController::class,'getRoleList']);               // Get list of roles with condition(s)
     Route::get('/list', [RolesController::class, 'index']);                           // Get list of roles
     Route::get('/screenaccessroleslist', [RolesController::class, 'screenaccessroleslist']); // Get screen access roles list
     Route::get('/branch-viewlist', [RolesController::class, 'branch_view_list']);      // Get branch view list
