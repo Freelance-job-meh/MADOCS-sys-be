@@ -19,4 +19,10 @@ class StaffManagement extends Model
         'updated_at'
 
     ];
+
+    
+    public function user()
+    {
+        return $this->hasOne(User::class, 'staff_id', 'staff_id');
+    }
 }

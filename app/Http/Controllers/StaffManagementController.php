@@ -2,42 +2,72 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
-use App\Models\StaffManagement;
-use Validator;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\ScreenAccessRoles;
+use App\Models\StaffManagement;
+use App\Models\Roles;
+use Validator;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class StaffManagementController extends Controller
 {
+    public function rules()
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'nric_no' => 'required|string|unique:staff_management,nric_no',
+            'email' => 'required|email|unique:users,email',
+            'contact_no' => 'required|string|max:15',
+            'role_id' => 'required|exists:roles,id',
+            'added_by' => 'required|integer',
+        ];
+    }
 
     public function getStaffList()
     {
-        $userList = DB::table('staff_management')
-        ->select('staff_management.staff_id','staff_management.name','staff_management.nric_no','staff_management.contact_no','users.email','users.status as status','roles.role_name as role','users.id as user_id')
-        ->leftJoin('users','users.staff_id','=','staff_management.staff_id')
-        ->leftJoin('roles','roles.id','=','users.role_id')
-        ->orderBy('staff_management.name','asc')
-        ->get();
-
-        foreach($userList as $item){
-        
-            $item->name  =  strtoupper($item->name) ?? '-';
+        // Fetch staff list using Eloquent with relationships
+        $userList = StaffManagement::getQuery()
+            ->leftJoin('users', 'users.staff_id', '=', 'staff_management.staff_id')
+            ->leftJoin('roles', 'roles.id', '=', 'users.role_id')
+            ->orderBy('staff_management.name', 'asc')
+            ->paginate(10);
+    
+        // Modify the result set as required
+        $userList->getCollection()->transform(function ($item) {
+            $item->name = strtoupper($item->name) ?? '-';
             $item->nric_no = $item->nric_no ?? '-';
             $item->contact_no = $item->contact_no ?? '-';
             $item->email = $item->email ?? '-';
             $item->role = strtoupper($item->role) ?? '-';
             
-            if($item->status == 0){
-                $item->status = 'Active'; 
+            // Set status based on its value
+            if ($item->status == 0) {
+                $item->status = 'Active';
+            } elseif ($item->status == 1) {
+                $item->status = 'Inactive';
             }
-            if($item->status == 1){
-                $item->status = 'Inactive'; 
-            }
-            
-        }
-        return response()->json(["message" => "Staff List", 'list' => $userList, "code" => 200]);
+
+            return $item;
+        });
+        // if (!$userList)
+        // {
+        //     return response()->json(["message" => "No Record Available", "code" => 400]);
+        // }
+
+        // Return paginated response
+        return response()->json([
+            "message" => "Staff List", 
+            'list' => $userList->items(), // Items for current page
+            "code" => 200,
+            "pagination" => [
+                "current_page" => $userList->currentPage(),
+                "last_page" => $userList->lastPage(),
+                "per_page" => $userList->perPage(),
+                "total" => $userList->total(),
+            ]
+        ]);
     }
     public function getStaffListbyCode($code)
     {
@@ -241,13 +271,5 @@ class StaffManagementController extends Controller
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 404);
         }
-
-   
    }
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-
-
 }
