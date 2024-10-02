@@ -63,10 +63,10 @@ Route::group(['prefix' => 'default-role-access','middleware' => 'apiInternal'], 
 });
 
 // -------------------- Staff Management Routes --------------------
-Route::group(['prefix' => 'staff-record','middleware' => 'apiInternal'], function () {
+Route::group(['prefix' => 'staff-record','middleware' => ['jwt.verify']], function () {
     Route::get('/getStaffList', [StaffManagementController::class, 'getStaffList']);  // Get list of staff
-    Route::get('/getStaffList/{code}', [StaffManagementController::class, 'getStaffListbyCode']); // Get staff by code
-    Route::get('/getStaffListById/{id}', [StaffManagementController::class, 'getStaffListbyId']); // Get staff by ID (changed to GET)
+    Route::get('/getStaffListByCode/{code}', [StaffManagementController::class, 'getStaffListByCode']); // Get staff by code
+    Route::get('/getStaffListById/{id}', [StaffManagementController::class, 'getStaffListById']); // Get staff by ID (changed to GET)
     Route::post('/createNewStaff', [StaffManagementController::class, 'createNewStaff']); // Create new staff
     Route::get('/isExistNric/{nric}', [StaffManagementController::class, 'isExistNric']); // Check if NRIC exists (changed to GET)
     Route::post('/deleteStaff/{id}', [StaffManagementController::class, 'deleteStaff']); // Delete staff by ID (changed to DELETE)

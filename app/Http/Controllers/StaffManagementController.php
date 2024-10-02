@@ -27,49 +27,54 @@ class StaffManagementController extends Controller
 
     public function getStaffList()
     {
-        // Fetch staff list using Eloquent with relationships
-        $userList = StaffManagement::getQuery()
-            ->leftJoin('users', 'users.staff_id', '=', 'staff_management.staff_id')
-            ->leftJoin('roles', 'roles.id', '=', 'users.role_id')
-            ->orderBy('staff_management.name', 'asc')
+        Log::info('Fetching staff list');
+        // Fetch paginated staff list with relationships
+        $staffList = StaffManagement::with('user','roles')
+            ->orderBy('name', 'asc')
             ->paginate(10);
-    
-        // Modify the result set as required
-        $userList->getCollection()->transform(function ($item) {
+
+        // // Check if the result set is empty
+        // if ($staffList->count() == 0) {
+        //     return response()->json(['error' => 'No staff found'], 404);
+        // }
+
+        // Transform each staff record in the collection
+        $staffList->getCollection()->transform(function ($item) {
             $item->name = strtoupper($item->name) ?? '-';
             $item->nric_no = $item->nric_no ?? '-';
             $item->contact_no = $item->contact_no ?? '-';
             $item->email = $item->email ?? '-';
-            $item->role = strtoupper($item->role) ?? '-';
             
-            // Set status based on its value
+            // If the staff member has multiple roles, extract them as a string
+            // $item->role = $item->roles->isNotEmpty() ? $item->roles->pluck('name')->map(function ($roleName) {
+            //     return strtoupper($roleName);
+            // })->implode(', ') : '-';
+            
             if ($item->status == 0) {
                 $item->status = 'Active';
             } elseif ($item->status == 1) {
                 $item->status = 'Inactive';
             }
-
+        
             return $item;
         });
-        // if (!$userList)
-        // {
-        //     return response()->json(["message" => "No Record Available", "code" => 400]);
-        // }
+        Log::info('Fetching staff list' . $staffList);
 
-        // Return paginated response
+        // Return the paginated staff list with pagination metadata
         return response()->json([
             "message" => "Staff List", 
-            'list' => $userList->items(), // Items for current page
+            'list' => $staffList->items(), 
             "code" => 200,
             "pagination" => [
-                "current_page" => $userList->currentPage(),
-                "last_page" => $userList->lastPage(),
-                "per_page" => $userList->perPage(),
-                "total" => $userList->total(),
+                "current_page" => $staffList->currentPage(),
+                "last_page" => $staffList->lastPage(),
+                "per_page" => $staffList->perPage(),
+                "total" => $staffList->total(),
             ]
         ]);
     }
-    public function getStaffListbyCode($code)
+
+    public function getStaffListByCode($code)
     {
         $userList = DB::table('staff_management')
         ->select('staff_management.staff_id','staff_management.name','staff_management.nric_no','staff_management.contact_no','users.email','users.status as status','roles.role_name as role')
@@ -98,7 +103,7 @@ class StaffManagementController extends Controller
        
         return response()->json(["message" => "Staff List by code :", 'list' => $userList, "code" => 200]);
     }
-    public function getStaffListbyId(Request $request)
+    public function getStaffListById(Request $request)
     {
         $userList = DB::table('staff_management')
         ->select('staff_management.staff_id','staff_management.name','staff_management.nric_no','staff_management.contact_no','users.email','users.status as status','roles.id as role_id','roles.role_name as role')
